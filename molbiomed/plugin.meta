@@ -1,16 +1,16 @@
 {
-    "id": "molbiomed",
-    "name": "MolBioMed",
-    "description": "MolBioMed Horus plugin",
-    "author": "Christian Dominguez, Alex Perez",
-    "version": "0.0.1",
-    "pluginFile": "plugin.py",
-    "minHorusVersion": "0.8.1",
-    "maxHorusVersion": null,
-    "platforms": [
-        "universal"
-    ],
-    "externalURL": null,
-    "dependencies": [],
-    "pluginRequires": []
+  "id": "molbiomed",
+  "name": "MolBioMed",
+  "description": "MolBioMed Horus plugin",
+  "author": "Christian Dominguez, Alex Perez",
+  "version": "0.0.1",
+  "pluginFile": "plugin.py",
+  "minHorusVersion": "0.8.1",
+  "maxHorusVersion": null,
+  "platforms": [
+    "universal"
+  ],
+  "externalURL": null,
+  "dependencies": [],
+  "pluginRequires": []
 }
