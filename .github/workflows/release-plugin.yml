@@ -1,0 +1,77 @@
+name: Build and Release MolBioMed Plugin
+
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "Version (e.g. 0.0.2)"
+                required: true
+                type: string
+
+permissions:
+    contents: write
+
+jobs:
+    build-release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Set version
+              id: version
+              run: |
+                  VERSION="${{ inputs.version }}"
+                  if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then echo "Invalid version format"; exit 1; fi
+                  sed -i -E "s/(\"version\": )\"[^"]+\"/\1\"$VERSION\"/" molbiomed/plugin.meta
+                  echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+            - name: Commit version bump
+              run: |
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@users.noreply.github.com"
+                  git add molbiomed/plugin.meta
+                  git commit -m "Bump plugin.meta version to ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+                  git push
+
+            - name: Build plugin (.hp)
+              run: |
+                  chmod +x build_plugin.sh
+                  ./build_plugin.sh
+                  ls -l molbiomed.hp
+
+            - name: Create tag
+              run: |
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@users.noreply.github.com"
+                  TAG="v${{ steps.version.outputs.version }}"
+                  if git rev-parse "$TAG" >/dev/null 2>&1; then echo "Tag $TAG already exists"; else git tag -a "$TAG" -m "MolBioMed $TAG" && git push origin "$TAG"; fi
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ steps.version.outputs.version }}
+                  name: MolBioMed v${{ steps.version.outputs.version }}
+                  body: Molbiomed plugin release
+                  draft: false
+                  prerelease: false
+                  files: molbiomed.hp
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload to Horus Plugin Repository
+              env:
+                  SERVER_URL: https://horus.bsc.es/repo_api/plugins
+                  PLUGIN_REPO_TOKEN: ${{ secrets.PLUGIN_REPO_TOKEN }}
+                  HP_FILE: molbiomed.hp
+                  DESCRIPTION: "Molbiomed plugin"
+              run: |
+                  if [ ! -f "$HP_FILE" ]; then echo "Missing $HP_FILE"; exit 1; fi
+                  response=$(curl --fail --show-error --max-time 30 -s -o /tmp/curl_output.txt -w "%{http_code}" -X POST "$SERVER_URL" \
+                    -H "Authorization: Bearer $PLUGIN_REPO_TOKEN" \
+                    -F "file=@$HP_FILE" \
+                    -F "description=$DESCRIPTION") || { echo "Upload failed"; cat /tmp/curl_output.txt; exit 1; }
+                  if [ "$response" != "200" ]; then echo "Unexpected status: $response"; cat /tmp/curl_output.txt; exit 1; fi
+                  echo "Upload succeeded"

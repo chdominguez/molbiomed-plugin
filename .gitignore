@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+.pipenv/
+.poetry/
+.pyenv/
+.conda/
+
+# Packaging / build
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+*.egg
+
+# Testing
+.tox/
+.nox/
+.pytest_cache/
+.coverage
+coverage.*
+htmlcov/
+
+# Type checking / linting caches
+.mypy_cache/
+.pytype/
+.pyre/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Project specific
+Flows/
+examples/
+*.hp
+molbiomed/deps/

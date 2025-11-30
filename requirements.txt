@@ -1,0 +1,10 @@
+# THOSE ARE ONLY NEEDED FOR DEVELOPMENT (used in the IDE)
+black
+isort
+pylint
+flake8
+pytest
+pytest-cov
+pyright
+mypy
+flake8-pyproject
