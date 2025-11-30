@@ -25,7 +25,9 @@ jobs:
               run: |
                   VERSION="${{ inputs.version }}"
                   if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then echo "Invalid version format"; exit 1; fi
-                  sed -i -E "s/(\"version\": )\"[^"]+\"/\1\"$VERSION\"/" molbiomed/plugin.meta
+                    if ! command -v jq >/dev/null 2>&1; then sudo apt-get update && sudo apt-get install -y jq; fi
+                    tmp=$(jq --arg v "$VERSION" '.version = $v' molbiomed/plugin.meta)
+                    printf "%s\n" "$tmp" > molbiomed/plugin.meta
                   echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
             - name: Commit version bump
